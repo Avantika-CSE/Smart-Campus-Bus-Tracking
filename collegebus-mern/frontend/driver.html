@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Driver Dashboard - Bus Tracking System</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="icon" href="assets/logo.png">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.css">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<div class="app-shell">
+  <aside class="sidebar">
+    <div class="side-photo logo-photo"><img src="assets/logo.png" alt="logo"></div>
+    <div class="nav-item active" data-section="route"><span class="ico">🛣️</span> My Route</div>
+    <div class="nav-item" data-section="live"><span class="ico">📍</span> Live Location</div>
+    <div class="nav-item" data-section="stops"><span class="ico">🚏</span> Stops</div>
+    <div class="nav-item" data-section="notifications"><span class="ico">🔔</span> Notifications <span class="nav-badge" id="sideNotifBadge">0</span></div>
+    <div class="nav-item" data-section="profile"><span class="ico">👤</span> Profile</div>
+    <div class="nav-item" id="logoutBtn"><span class="ico">↪</span> Logout</div>
+    <div class="sidebar-quote">"Drive Safe, Keep Students Safe"</div>
+  </aside>
+
+  <div>
+    <header class="topbar">
+      <div class="topbar-brand" style="display:flex;align-items:center;gap:10px;font-weight:700;color:var(--navy);">
+        <img src="assets/logo.png" style="width:30px;height:30px;object-fit:contain;"> Bus Tracking System
+      </div>
+      <div class="topbar-right">
+        <div class="bell" id="bellBtn">🔔<span class="nav-badge" id="topNotifBadge">0</span></div>
+        <div class="user-chip">
+          <div class="avatar" id="userAvatar">R</div>
+          <div><strong id="userName">-</strong><span>Bus Driver</span></div>
+        </div>
+      </div>
+    </header>
+
+    <main class="content">
+
+      <!-- MY ROUTE -->
+      <section class="section active" id="sec-route">
+        <div class="page-head">
+          <div><h2 id="helloName">Good Morning! 👋</h2><p>Here's your current route and trip information.</p></div>
+          <div class="date-chip">📅 <span id="dateLabel"></span></div>
+        </div>
+
+        <div class="stat-grid">
+          <div class="card stat-card"><div class="stat-ico blue">🚌</div><div><div class="label">Bus No.</div><div class="value" id="statBusNo">-</div><span class="pill on-route" id="statRouteStatus">On Route</span></div></div>
+          <div class="card stat-card"><div class="stat-ico green">🛣️</div><div><div class="label">Route</div><div class="value" id="statRoute">-</div><div class="sub" id="statRouteDesc"></div></div></div>
+          <div class="card stat-card"><div class="stat-ico orange">📍</div><div><div class="label">Current Location</div><div class="value" id="statLocation">-</div><div class="sub">Live</div></div></div>
+          <div class="card stat-card"><div class="stat-ico purple">⏰</div><div><div class="label">Next Stop</div><div class="value" id="statNextStop">-</div><div class="sub" id="statNextDist"></div></div></div>
+        </div>
+
+        <div class="grid-main">
+          <div>
+            <div class="card" style="margin-bottom:18px;">
+              <div class="card-title"><h3>📍 Live Route Tracking</h3><span class="pill on-route" id="routeActivePill">Route Active</span></div>
+              <div id="mapHolder"></div>
+            </div>
+            <div class="grid-main" style="grid-template-columns:1.4fr 1fr;">
+              <div class="card stop-list">
+                <div class="card-title"><h3>🚏 Upcoming Stops</h3></div>
+                <div id="upcomingStops"></div>
+              </div>
+              <div class="card">
+                <div class="card-title"><h3>💬 Notes / Messages</h3></div>
+                <div class="msg-box">Please follow the route and maintain proper time. In case of any issue, contact the transport office.<span class="time" id="msgTime"></span></div>
+              </div>
+            </div>
+          </div>
+
+          <div>
+            <div class="card" style="margin-bottom:18px;">
+              <div class="card-title"><h3>🛣️ Route Control</h3></div>
+              <div class="control-status"><span class="dot"></span><span id="controlStatusLabel">Route Not Started</span></div>
+              <div class="control-btns">
+                <button class="btn-start" id="startRouteBtn">▶ Start Route</button>
+                <button class="btn-end" id="endRouteBtn" disabled>■ End Route</button>
+              </div>
+              <div class="card-title"><h3>🕐 Trip Information</h3></div>
+              <div class="detail-row"><div class="ico">🛣️</div><div><span class="k">Route Name</span><span class="v" id="tripRoute">-</span></div></div>
+              <div class="detail-row"><div class="ico">🏫</div><div><span class="k">From</span><span class="v">College</span></div></div>
+              <div class="detail-row"><div class="ico">🏁</div><div><span class="k">To</span><span class="v" id="tripTo">-</span></div></div>
+              <div class="detail-row"><div class="ico">⏱️</div><div><span class="k">Estimated Arrival (Next Stop)</span><span class="v" id="tripNextEta">-</span></div></div>
+              <div class="detail-row"><div class="ico">⏰</div><div><span class="k">Departure Time</span><span class="v" id="tripDeparture">-</span></div></div>
+              <div class="detail-row"><div class="ico">🕐</div><div><span class="k">Current Time</span><span class="v" id="tripCurrentTime">-</span></div></div>
+            </div>
+
+            <div class="route-banner logo-banner">
+              <img src="assets/logo.png" alt="logo" class="banner-logo">
+              <div class="txt">"Safe Drive<br>Happy Students"</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- LIVE LOCATION -->
+      <section class="section" id="sec-live">
+        <div class="page-head"><div><h2>Live Location</h2><p>Your bus's current position on the route.</p></div></div>
+        <div class="card"><div id="mapHolderBig"></div></div>
+      </section>
+
+      <!-- STOPS -->
+      <section class="section" id="sec-stops">
+        <div class="page-head"><div><h2>Stops</h2><p>Full stop schedule for today's trip.</p></div></div>
+        <div class="card stop-list" id="stopsFullList"></div>
+      </section>
+
+      <!-- NOTIFICATIONS -->
+      <section class="section" id="sec-notifications">
+        <div class="page-head"><div><h2>Notifications</h2><p>Updates from the transport office.</p></div><button class="btn-secondary btn-small" id="markAllRead">Mark all as read</button></div>
+        <div class="card" id="allNotifs"></div>
+      </section>
+
+      <!-- PROFILE -->
+      <section class="section" id="sec-profile">
+        <div class="page-head"><div><h2>Profile</h2><p>Manage your driver account.</p></div></div>
+        <div class="card" style="max-width:520px;">
+          <div class="form-grid">
+            <div class="full"><label class="form-label">Full Name</label><input type="text" id="pfName"></div>
+            <div><label class="form-label">Driver ID</label><input type="text" id="pfRoll" disabled></div>
+            <div><label class="form-label">Email</label><input type="text" id="pfEmail" disabled></div>
+            <div class="full"><label class="form-label">Phone</label><input type="text" id="pfPhone"></div>
+          </div>
+          <div class="form-actions"><button class="btn-secondary" id="saveProfileBtn">Save Changes</button></div>
+          <hr style="border:none;border-top:1px solid var(--border);margin:20px 0;">
+          <div class="form-grid">
+            <div><label class="form-label">Current Password</label><input type="password" id="pfCurPass"></div>
+            <div><label class="form-label">New Password</label><input type="password" id="pfNewPass"></div>
+          </div>
+          <div class="field-error" id="pfPassErr"></div>
+          <div class="form-actions"><button class="btn-secondary" id="changePassBtn">Change Password</button></div>
+        </div>
+      </section>
+
+    </main>
+  </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.js"></script>
+<script src="/socket.io/socket.io.js"></script>
+<script src="js/api.js"></script>
+<script src="js/data.js"></script>
+<script src="js/common.js"></script>
+<script src="js/driver.js"></script>
+</body>
+</html>

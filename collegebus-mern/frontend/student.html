@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Student Dashboard - Bus Tracking System</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="icon" href="assets/logo.png">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.css">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<div class="app-shell">
+  <aside class="sidebar">
+    <div class="side-photo logo-photo"><img src="assets/logo.png" alt="logo"></div>
+    <div class="nav-item active" data-section="dashboard"><span class="ico">🏠</span> Dashboard</div>
+    <div class="nav-item" data-section="tracking"><span class="ico">📍</span> Live Tracking</div>
+    <div class="nav-item" data-section="routes"><span class="ico">🛣️</span> Bus Routes</div>
+    <div class="nav-item" data-section="myroute"><span class="ico">🧭</span> My Route</div>
+    <div class="nav-item" data-section="notifications"><span class="ico">🔔</span> Notifications <span class="nav-badge" id="sideNotifBadge">0</span></div>
+    <div class="nav-item" data-section="profile"><span class="ico">👤</span> My Profile</div>
+    <div class="nav-item" id="logoutBtn"><span class="ico">↪</span> Logout</div>
+    <div class="sidebar-quote">"A safer ride to a brighter future"</div>
+  </aside>
+
+  <div>
+    <header class="topbar">
+      <div class="topbar-brand" style="display:flex;align-items:center;gap:10px;font-weight:700;color:var(--navy);">
+        <img src="assets/logo.png" style="width:30px;height:30px;object-fit:contain;"> Bus Tracking System
+      </div>
+      <div class="topbar-right">
+        <div class="bell" id="bellBtn">🔔<span class="nav-badge" id="topNotifBadge">0</span></div>
+        <div class="user-chip">
+          <div class="avatar" id="userAvatar">A</div>
+          <div><strong id="userName">-</strong><span>Student</span></div>
+        </div>
+      </div>
+    </header>
+
+    <main class="content">
+
+      <!-- DASHBOARD -->
+      <section class="section active" id="sec-dashboard">
+        <div class="page-head">
+          <div><h2 id="helloName">Hello! 👋</h2><p>Here's your bus information for today.</p></div>
+          <div class="date-chip">📅 <span id="dateLabel"></span></div>
+        </div>
+
+        <div class="stat-grid">
+          <div class="card stat-card"><div class="stat-ico blue">🚌</div><div><div class="label">Bus No.</div><div class="value" id="statBusNo">-</div><span class="pill on-time" id="statBusStatus">On Time</span></div></div>
+          <div class="card stat-card"><div class="stat-ico green">📍</div><div><div class="label">Current Location</div><div class="value" id="statLocation">-</div><div class="sub" id="statDistance"></div></div></div>
+          <div class="card stat-card"><div class="stat-ico orange">⏰</div><div><div class="label">Estimated Arrival</div><div class="value" id="statEta">-</div><div class="sub">(at your stop)</div></div></div>
+        </div>
+
+        <div class="grid-main">
+          <div>
+            <div class="card" style="margin-bottom:18px;">
+              <div class="card-title"><h3>📍 Live Bus Tracking</h3></div>
+              <div id="mapHolder"></div>
+            </div>
+            <div class="grid-main" style="grid-template-columns:1fr 1fr;">
+              <div class="card stop-list">
+                <div class="card-title"><h3>🚏 Upcoming Stops</h3></div>
+                <div id="upcomingStops"></div>
+              </div>
+              <div class="card quick-actions">
+                <div class="card-title"><h3>⚡ Quick Actions</h3></div>
+                <div class="qa-row" data-goto="tracking"><div class="ico">🗺️</div>View Full Route<div class="arrow">›</div></div>
+                <div class="qa-row" data-goto="routes"><div class="ico">⏱️</div>Check Bus Timings<div class="arrow">›</div></div>
+                <div class="qa-row" data-goto="notifications"><div class="ico">🔔</div>View Notifications<div class="arrow">›</div></div>
+                <div class="qa-row" id="contactDriverBtn"><div class="ico">📞</div>Contact Driver<div class="arrow">›</div></div>
+              </div>
+            </div>
+          </div>
+
+          <div>
+            <div class="card" style="margin-bottom:18px;">
+              <div class="card-title"><h3>🚌 Bus Details</h3></div>
+              <div class="side-photo logo-photo" style="height:90px;"><img src="assets/logo.png" alt="logo"></div>
+              <div class="detail-row"><div class="ico">🚌</div><div><span class="k">Bus No.</span><span class="v" id="detBusNo">-</span></div></div>
+              <div class="detail-row"><div class="ico">🛣️</div><div><span class="k">Route</span><span class="v" id="detRoute">-</span></div></div>
+              <div class="detail-row"><div class="ico">👤</div><div><span class="k">Driver</span><span class="v" id="detDriver">-</span></div></div>
+              <div class="detail-row"><div class="ico">📞</div><div><span class="k">Contact</span><span class="v" id="detContact">-</span></div></div>
+              <div class="detail-row"><div class="ico">⏰</div><div><span class="k">Departure Time</span><span class="v" id="detDeparture">-</span></div></div>
+              <div class="detail-row"><div class="ico">⏰</div><div><span class="k">Expected Arrival</span><span class="v" id="detArrival">-</span></div></div>
+              <div class="status-banner" id="detStatusBanner">🟢 Bus is On Time</div>
+            </div>
+
+            <div class="card">
+              <div class="card-title"><h3>🔔 Recent Notifications</h3><span class="more" data-goto="notifications">View All →</span></div>
+              <div id="recentNotifs"></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- LIVE TRACKING -->
+      <section class="section" id="sec-tracking">
+        <div class="page-head"><div><h2>Live Tracking</h2><p>Follow your bus in real time.</p></div></div>
+        <div class="card"><div id="mapHolderBig"></div></div>
+      </section>
+
+      <!-- ROUTES -->
+      <section class="section" id="sec-routes">
+        <div class="page-head"><div><h2>Bus Routes</h2><p>All active college bus routes.</p></div></div>
+        <div class="card">
+          <table>
+            <thead><tr><th>Bus No.</th><th>Route</th><th>Departure</th><th>Status</th><th>Current Location</th></tr></thead>
+            <tbody id="routesTableBody"></tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- MY ROUTE (select one of the real routes + see its live location) -->
+      <section class="section" id="sec-myroute">
+        <div class="page-head"><div><h2>My Route</h2><p>Pick your bus route to see its stops, driver and live location.</p></div></div>
+
+        <div class="card" style="margin-bottom:18px;">
+          <label class="form-label">Select Your Route</label>
+          <select id="myRouteSelect" style="max-width:420px;">
+            <option value="">-- Select a route --</option>
+          </select>
+        </div>
+
+        <div id="myRouteEmpty" class="card empty-note">No route selected yet - choose one above to see its full details and live bus location.</div>
+
+        <div id="myRouteContent" style="display:none;">
+          <div class="grid-main">
+            <div>
+              <div class="card" style="margin-bottom:18px;">
+                <div class="card-title"><h3>📍 Live Bus Location</h3></div>
+                <div id="myRouteMapHolder"></div>
+              </div>
+              <div class="card stop-list">
+                <div class="card-title"><h3>🚏 All Stops</h3></div>
+                <div id="myRouteStops"></div>
+              </div>
+            </div>
+            <div>
+              <div class="card">
+                <div class="card-title"><h3>🚌 Route Details</h3></div>
+                <div class="detail-row"><div class="ico">🛣️</div><div><span class="k">Route</span><span class="v" id="myRouteName">-</span></div></div>
+                <div class="detail-row"><div class="ico">🚌</div><div><span class="k">Bus No.</span><span class="v" id="myRouteBusNo">-</span></div></div>
+                <div class="detail-row"><div class="ico">👤</div><div><span class="k">Driver</span><span class="v" id="myRouteDriver">-</span></div></div>
+                <div class="detail-row"><div class="ico">📞</div><div><span class="k">Contact</span><span class="v" id="myRouteContact">-</span></div></div>
+                <div class="detail-row"><div class="ico">⏰</div><div><span class="k">Departure</span><span class="v" id="myRouteDeparture">-</span></div></div>
+                <div class="detail-row"><div class="ico">🏁</div><div><span class="k">Arrival</span><span class="v" id="myRouteArrival">-</span></div></div>
+                <div class="status-banner" id="myRouteStatusBanner">🟢 Route Not Started</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- NOTIFICATIONS -->
+      <section class="section" id="sec-notifications">
+        <div class="page-head"><div><h2>Notifications</h2><p>Stay updated on your bus and route changes.</p></div><button class="btn-secondary btn-small" id="markAllRead">Mark all as read</button></div>
+        <div class="card" id="allNotifs"></div>
+      </section>
+
+      <!-- PROFILE -->
+      <section class="section" id="sec-profile">
+        <div class="page-head"><div><h2 id="pfTitle">My Profile</h2><p id="pfSub">Manage your account details.</p></div></div>
+        <div class="card" id="pfBanner" style="display:none;max-width:520px;margin-bottom:14px;border-left:4px solid var(--blue);">
+          <b>Almost there!</b> Your email is verified. Please fill in your profile to open your dashboard.
+        </div>
+        <div class="card" style="max-width:520px;">
+          <div class="form-grid">
+            <div class="full"><label class="form-label">Email <span style="color:var(--green);font-weight:600;">✔ verified</span></label><input type="text" id="pfEmail" disabled></div>
+            <div class="full"><label class="form-label">Full Name</label><input type="text" id="pfName" class="field-plain" maxlength="80" placeholder="As on your college ID"></div>
+            <div class="full field-error" id="pfNameErr"></div>
+            <div class="full"><label class="form-label">Roll Number</label><input type="text" id="pfRoll" maxlength="30" placeholder="e.g. UGF25CS017"></div>
+            <div class="full field-error" id="pfRollErr"></div>
+            <div class="full"><label class="form-label">Phone</label><input type="text" id="pfPhone" maxlength="20" placeholder="10-digit mobile number"></div>
+            <div class="full field-error" id="pfPhoneErr"></div>
+          </div>
+          <div class="form-actions"><button class="btn btn-primary btn-small" id="saveProfileBtn">Save Changes</button></div>
+        </div>
+      </section>
+
+    </main>
+  </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.js"></script>
+<script src="/socket.io/socket.io.js"></script>
+<script src="js/api.js"></script>
+<script src="js/data.js"></script>
+<script src="js/common.js"></script>
+<script src="js/student.js"></script>
+</body>
+</html>

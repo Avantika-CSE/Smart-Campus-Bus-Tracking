@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Admin Dashboard - Bus Tracking System</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="icon" href="assets/logo.png">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.css">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<div class="app-shell">
+  <aside class="sidebar">
+    <div class="side-photo logo-photo"><img src="assets/logo.png" alt="logo"></div>
+    <div class="nav-item active" data-section="dashboard"><span class="ico">🏠</span> Dashboard</div>
+    <div class="nav-item" data-section="buses"><span class="ico">🚌</span> Manage Buses</div>
+    <div class="nav-item" data-section="routes"><span class="ico">🛣️</span> Manage Routes</div>
+    <div class="nav-item" data-section="drivers"><span class="ico">🧑‍✈️</span> Manage Drivers</div>
+    <div class="nav-item" data-section="mapsetup"><span class="ico">📍</span> Map Setup</div>
+    <div class="nav-item" data-section="tracking"><span class="ico">📍</span> Live Tracking</div>
+    <div class="nav-item" data-section="users"><span class="ico">👥</span> Users</div>
+    <div class="nav-item" data-section="notifications"><span class="ico">🔔</span> Notifications <span class="nav-badge" id="sideNotifBadge">0</span></div>
+    <div class="nav-item" data-section="reports"><span class="ico">📊</span> Reports</div>
+    <div class="nav-item" data-section="settings"><span class="ico">⚙️</span> Settings</div>
+    <div class="nav-item" id="logoutBtn"><span class="ico">↪</span> Logout</div>
+    <div class="sidebar-quote">Safe Journey, Better Tomorrow</div>
+  </aside>
+
+  <div>
+    <header class="topbar">
+      <div class="topbar-search" id="searchWrap">
+        <span>🔍</span>
+        <input type="search" id="adminSearch" placeholder="Search buses, routes, students, drivers..." autocomplete="off" maxlength="60" aria-label="Search">
+        <button type="button" id="searchClear" title="Clear search" style="display:none;">✕</button>
+        <div class="search-panel" id="searchPanel" style="display:none;"></div>
+      </div>
+      <div class="topbar-right">
+        <div class="bell" id="bellBtn">🔔<span class="nav-badge" id="topNotifBadge">0</span></div>
+        <div class="user-chip">
+          <div class="avatar" id="userAvatar">A</div>
+          <div><strong id="userName">Admin</strong><span>System Administrator</span></div>
+        </div>
+      </div>
+    </header>
+
+    <main class="content">
+
+      <!-- DASHBOARD -->
+      <section class="section active" id="sec-dashboard">
+        <div class="page-head">
+          <div><h2>Welcome Back, Admin!</h2><p>Here's what's happening with your bus system today.</p></div>
+          <div class="date-chip">📅 <span id="dateLabel"></span></div>
+        </div>
+
+        <div class="stat-grid">
+          <div class="card stat-card"><div class="stat-ico blue">🚌</div><div><div class="label">Total Buses</div><div class="value" id="statTotalBuses">-</div><div class="sub" id="statBusesSub"></div></div></div>
+          <div class="card stat-card"><div class="stat-ico green">🛣️</div><div><div class="label">Total Routes</div><div class="value" id="statTotalRoutes">-</div><div class="sub" id="statRoutesSub"></div></div></div>
+          <div class="card stat-card"><div class="stat-ico purple">👥</div><div><div class="label">Total Students</div><div class="value" id="statTotalStudents">-</div><div class="sub">Active Users</div></div></div>
+          <div class="card stat-card"><div class="stat-ico orange">🎓</div><div><div class="label">Total Drivers</div><div class="value" id="statTotalDrivers">-</div><div class="sub" id="statDriversSub"></div></div></div>
+        </div>
+
+        <div class="grid-main">
+          <div>
+            <div class="card" style="margin-bottom:18px;">
+              <div class="card-title"><h3>📍 Live Bus Tracking</h3><span class="more" data-goto="tracking">View All Buses →</span></div>
+              <div id="mapHolder"></div>
+            </div>
+            <div class="card">
+              <div class="card-title"><h3>📊 Route Performance</h3><span class="more" data-goto="reports">View Report →</span></div>
+              <div id="perfChart"></div>
+            </div>
+          </div>
+
+          <div>
+            <div class="card" style="margin-bottom:18px;">
+              <div class="card-title"><h3>🚌 Buses Overview</h3><span class="more" data-goto="buses">Manage Buses →</span></div>
+              <table><thead><tr><th>Bus No.</th><th>Route</th><th>Status</th><th>Location</th></tr></thead><tbody id="busesOverviewBody"></tbody></table>
+            </div>
+            <div class="card" style="margin-bottom:18px;">
+              <div class="card-title"><h3>🔔 Recent Activities</h3><span class="more" data-goto="notifications">View All →</span></div>
+              <div id="recentActivities"></div>
+            </div>
+            <div class="card">
+              <div class="card-title"><h3>⚡ Quick Actions</h3></div>
+              <div class="qa-grid">
+                <div class="qa-tile blue" data-goto="buses" data-open="addBus">🚌<br>Add New Bus</div>
+                <div class="qa-tile purple" data-goto="routes" data-open="addRoute">🛣️<br>Add Route</div>
+                <div class="qa-tile green" data-goto="drivers" data-open="modalAddDriver">🧑‍✈️<br>Add Driver</div>
+                <div class="qa-tile orange" data-goto="users">👥<br>Manage Users</div>
+                <div class="qa-tile pink" data-goto="reports">📊<br>View Reports</div>
+                <div class="qa-tile red" data-open="sendNotif">🔔<br>Send Notification</div>
+                <div class="qa-tile grey" data-goto="settings">⚙️<br>System Settings</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- MANAGE BUSES -->
+      <section class="section" id="sec-buses">
+        <div class="page-head">
+          <div><h2>Manage Buses</h2><p>Add, view and remove buses in the fleet.</p></div>
+          <button class="btn btn-primary btn-small" id="openAddBus">➕ Add New Bus</button>
+        </div>
+        <div class="card">
+          <table><thead><tr><th>Bus No.</th><th>Route</th><th>Driver</th><th>Status</th><th>Location</th><th></th></tr></thead><tbody id="busesTableBody"></tbody></table>
+        </div>
+      </section>
+
+      <!-- MANAGE ROUTES -->
+      <section class="section" id="sec-routes">
+        <div class="page-head">
+          <div><h2>Manage Routes</h2><p>All configured bus routes.</p></div>
+          <button class="btn btn-primary btn-small" id="openAddRoute">➕ Add Route</button>
+        </div>
+        <div class="card">
+          <table><thead><tr><th>Route</th><th>Stops</th><th>Status</th><th></th></tr></thead><tbody id="routesTableBody"></tbody></table>
+        </div>
+      </section>
+
+      <!-- MANAGE DRIVERS -->
+      <section class="section" id="sec-drivers">
+        <div class="page-head">
+          <div><h2>Manage Drivers</h2><p>Add a driver together with their bus, route and stops. The driver then signs in with the Name, Unique ID and Email you enter here.</p></div>
+          <button class="btn btn-primary btn-small" id="openAddDriver">➕ Add Driver</button>
+        </div>
+        <div class="card" id="driverAddedNote" style="display:none;margin-bottom:18px;border-left:4px solid var(--green);"></div>
+        <div class="card">
+          <table><thead><tr><th>Driver</th><th>Unique ID</th><th>Email</th><th>Phone</th><th>Bus No.</th><th>Route</th><th></th></tr></thead><tbody id="driversTableBody"></tbody></table>
+          <div class="table-note">Stops are shown on the map by name (searched on OpenStreetMap). Use the real, searchable name of each stop for the best map result.</div>
+        </div>
+      </section>
+
+      <!-- MAP SETUP -->
+      <section class="section" id="sec-mapsetup">
+        <div class="page-head">
+          <div><h2>Map Setup</h2><p>Put every stop in the right place. Only admins see this page; students and drivers just see the finished map.</p></div>
+        </div>
+        <div class="card">
+          <div class="ms-toolbar">
+            <button class="btn-secondary btn-small" id="msPrev">◀ Previous</button>
+            <select id="msRoute"></select>
+            <button class="btn-secondary btn-small" id="msNext">Next ▶</button>
+            <span class="ms-count" id="msCount"></span>
+          </div>
+          <div class="ms-summary" id="msSummary"></div>
+          <div class="ms-layout">
+            <div class="ms-list" id="msStops"></div>
+            <div class="ms-mapcol">
+              <div class="ms-hint" id="msHint"></div>
+              <div class="ms-bar"><input type="text" id="msSearch" placeholder="Search a place, e.g. JIT College Koradi Road"><button class="btn btn-primary btn-small" id="msSearchBtn">Search</button></div>
+              <div id="msResults"></div>
+              <div class="ms-bar"><input type="text" id="msLatLng" placeholder="Or paste from Google Maps, e.g. 21.1234, 79.0123"><button class="btn-secondary btn-small" id="msUseLatLng">Use</button></div>
+              <div class="live-map" id="msMap" style="height:460px;"></div>
+              <div class="table-note">Click the map to place the selected stop. Drag a dot to move it. The blue line follows the real roads and updates by itself. A stop used in more than one route is fixed in all of them.</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- LIVE TRACKING -->
+      <section class="section" id="sec-tracking">
+        <div class="page-head"><div><h2>Live Tracking</h2><p>Live position of the selected route's bus.</p></div></div>
+        <div class="card" style="margin-bottom:18px;">
+          <label class="form-label">Select Route to Track</label>
+          <select id="trackRouteSelect" style="max-width:420px;">
+            <option value="R1">Route 1 (Demo - College - Civil Lines - Main Stop)</option>
+          </select>
+        </div>
+        <div class="card"><div id="mapHolderBig"></div></div>
+      </section>
+
+      <!-- USERS -->
+      <section class="section" id="sec-users">
+        <div class="page-head"><div><h2>Users</h2><p>Everyone registered in the system.</p></div></div>
+        <div class="card">
+          <table><thead><tr><th>Name</th><th>Role</th><th>Roll / ID</th><th>Email</th><th>Phone</th><th></th></tr></thead><tbody id="usersTableBody"></tbody></table>
+        </div>
+      </section>
+
+      <!-- NOTIFICATIONS -->
+      <section class="section" id="sec-notifications">
+        <div class="page-head">
+          <div><h2>Notifications</h2><p>System-wide activity feed.</p></div>
+          <div style="display:flex;gap:8px;flex-wrap:wrap;"><button class="btn-secondary btn-small" id="markAllRead">Mark all as read</button><button class="btn btn-primary btn-small" id="openSendNotif">➕ Send Notification</button></div>
+        </div>
+        <div class="card" id="allNotifs"></div>
+      </section>
+
+      <!-- REPORTS -->
+      <section class="section" id="sec-reports">
+        <div class="page-head"><div><h2>Reports</h2><p>Route performance breakdown.</p></div></div>
+        <div class="card" style="margin-bottom:18px;">
+          <div class="card-title"><h3>📊 On-Time vs Delayed vs Cancelled</h3></div>
+          <div id="perfChartBig"></div>
+        </div>
+        <div class="card">
+          <table><thead><tr><th>Route</th><th>On Time %</th><th>Delayed %</th><th>Cancelled %</th></tr></thead><tbody id="reportsTableBody"></tbody></table>
+        </div>
+      </section>
+
+      <!-- SETTINGS -->
+      <section class="section" id="sec-settings">
+        <div class="page-head"><div><h2>Settings</h2><p>System-wide configuration.</p></div></div>
+        <div class="card" style="max-width:520px;">
+          <div class="form-grid">
+            <div class="full"><label class="form-label">College Name</label><input type="text" id="setCollegeName"></div>
+            <div class="full"><label class="form-label">Transport Office Contact</label><input type="text" id="setOfficeContact"></div>
+            <div class="full"><label class="form-label">Default Stop-to-Stop Interval (minutes)</label><input type="number" id="setInterval" min="1" max="30"></div>
+          </div>
+          <div class="form-actions"><button class="btn-secondary" id="saveSettingsBtn">Save Settings</button></div>
+        </div>
+      </section>
+
+    </main>
+  </div>
+</div>
+
+<!-- MODALS -->
+<div class="modal-backdrop" id="modalAddBus">
+  <div class="modal-box">
+    <h3>Add New Bus</h3>
+    <div class="form-grid">
+      <div class="full"><label class="form-label">Bus Number</label><input type="text" id="nbNo" placeholder="MH 31 XY 0000"></div>
+      <div><label class="form-label">Route Name</label><input type="text" id="nbRoute" placeholder="Route 6"></div>
+      <div><label class="form-label">Departure Time</label><input type="text" id="nbDeparture" placeholder="8:00 AM"></div>
+      <div class="full"><label class="form-label">Driver Name</label><input type="text" id="nbDriver" placeholder="Driver name"></div>
+      <div class="full"><label class="form-label">Contact Number</label><input type="text" id="nbContact" placeholder="+91 90000 00000"></div>
+    </div>
+    <div class="field-error" id="nbErr"></div>
+    <div class="form-actions"><button class="btn-secondary" data-close="modalAddBus">Cancel</button><button class="btn btn-primary btn-small" id="saveNewBus">Add Bus</button></div>
+  </div>
+</div>
+
+<div class="modal-backdrop" id="modalAddDriver">
+  <div class="modal-box">
+    <h3>Add Driver</h3>
+    <div class="form-grid">
+      <div class="full"><label class="form-label">Driver Name</label><input type="text" id="dvName" placeholder="Full name"></div>
+      <div><label class="form-label">Driver Email</label><input type="email" id="dvEmail" placeholder="driver@example.com"></div>
+      <div><label class="form-label">Phone</label><input type="text" id="dvPhone" placeholder="9876543210"></div>
+      <div class="full"><label class="form-label">Unique ID (optional - leave blank to auto-generate; JIT-DRV-201 or higher)</label><input type="text" id="dvUid" placeholder="JIT-DRV-206"></div>
+      <div><label class="form-label">Bus Number</label><input type="text" id="dvBusNo" placeholder="MH 31 XY 0000"></div>
+      <div><label class="form-label">Route Name</label><input type="text" id="dvRoute" placeholder="Route 9"></div>
+      <div class="full"><label class="form-label">Departure Time</label><input type="text" id="dvDeparture" placeholder="7:30 AM"></div>
+      <div class="full"><label class="form-label">Stops in order, comma separated (first = start, last = destination)</label><input type="text" id="dvStops" placeholder="Teka Naka, Kamal Chowk, Indora Chowk, JIT College"></div>
+    </div>
+    <div class="field-error" id="dvErr"></div>
+    <div class="form-actions"><button class="btn-secondary" data-close="modalAddDriver">Cancel</button><button class="btn btn-primary btn-small" id="saveNewDriver">Add Driver</button></div>
+  </div>
+</div>
+
+<div class="modal-backdrop" id="modalAddRoute">
+  <div class="modal-box">
+    <h3>Add Route</h3>
+    <div class="form-grid">
+      <div class="full"><label class="form-label">Route Name</label><input type="text" id="nrName" placeholder="Route 6"></div>
+      <div class="full"><label class="form-label">Stops (comma separated)</label><input type="text" id="nrStops" placeholder="College, Sadar, Main Stop"></div>
+    </div>
+    <div class="field-error" id="nrErr"></div>
+    <div class="form-actions"><button class="btn-secondary" data-close="modalAddRoute">Cancel</button><button class="btn btn-primary btn-small" id="saveNewRoute">Add Route</button></div>
+  </div>
+</div>
+
+<div class="modal-backdrop" id="modalSendNotif">
+  <div class="modal-box">
+    <h3>Send Notification</h3>
+    <div class="form-grid">
+      <div class="full"><label class="form-label">Send To</label>
+        <select id="snRole"><option value="student">Students</option><option value="driver">Drivers</option><option value="admin">Admins</option></select>
+      </div>
+      <div class="full"><label class="form-label">Title</label><input type="text" id="snTitle" placeholder="e.g. Route Changed"></div>
+      <div class="full"><label class="form-label">Message</label><input type="text" id="snDesc" placeholder="Notification details"></div>
+    </div>
+    <div class="field-error" id="snErr"></div>
+    <div class="form-actions"><button class="btn-secondary" data-close="modalSendNotif">Cancel</button><button class="btn btn-primary btn-small" id="saveNewNotif">Send</button></div>
+  </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.js"></script>
+<script src="/socket.io/socket.io.js"></script>
+<script src="js/api.js"></script>
+<script src="js/data.js"></script>
+<script src="js/common.js"></script>
+<script src="js/mapsetup.js"></script>
+<script src="js/adminsearch.js"></script>
+<script src="js/admin.js"></script>
+</body>
+</html>

@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Create Account - Bus Tracking System</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="icon" href="assets/logo.png">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<div class="auth-shell">
+  <div class="auth-hero">
+    <div class="hero-photo" style="background-image:url('assets/bus-photo.jpg')"></div>
+    <div class="hero-overlay"></div>
+    <div class="auth-hero-content">
+      <div class="hero-brand">
+        <img src="assets/logo.png" alt="logo">
+        <div>
+          <h1>Bus Tracking System</h1>
+          <p>Safe Journey &nbsp;|&nbsp; Smart Tracking &nbsp;|&nbsp; Better Connectivity</p>
+        </div>
+      </div>
+      <div class="hero-tagline">
+        <h2>Join the system,<br><span>in under a minute.</span></h2>
+      </div>
+      <div class="hero-features">
+        <div class="hero-feature"><div class="ico">📍</div><div><strong>Live Tracking</strong><span>Know bus location in real-time</span></div></div>
+        <div class="hero-feature"><div class="ico">🛡️</div><div><strong>Safe &amp; Secure</strong><span>Your safety is our priority</span></div></div>
+        <div class="hero-feature"><div class="ico">📶</div><div><strong>Better Connectivity</strong><span>Stay informed, stay connected</span></div></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="auth-form-side">
+    <div class="auth-card" style="max-width:460px;">
+      <a href="index.html" class="back-link">← Back to Login</a>
+      <div class="auth-card-brand">
+        <img src="assets/logo.png" alt="logo">
+        <div>
+          <h2>Create New Account</h2>
+          <p>New here? Start from the login page</p>
+        </div>
+      </div>
+
+      <div class="role-tabs" id="roleTabs">
+        <div class="role-tab active" data-role="student"><div class="role-check">✓</div><div class="ico">👤</div><strong>Student</strong><span>Track your bus</span></div>
+        <div class="role-tab" data-role="admin"><div class="role-check">✓</div><div class="ico">🧑‍💼</div><strong>Admin</strong><span>Manage system</span></div>
+        <div class="role-tab" data-role="driver"><div class="role-check">✓</div><div class="ico">🎓</div><strong>Bus Driver</strong><span>Update location</span></div>
+      </div>
+
+      <div id="signupNotice" class="card" style="margin:6px 0 4px;box-shadow:none;"></div>
+      <a href="index.html" class="btn btn-primary" id="goLoginBtn" style="margin-top:12px;">➜ Go to Login</a>
+
+      
+    </div>
+  </div>
+</div>
+
+<script src="js/api.js"></script>
+<script src="js/data.js"></script>
+<script src="js/common.js"></script>
+<script src="js/signup.js"></script>
+</body>
+</html>
